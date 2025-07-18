@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Birthday ya mang mang</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-r from-purple-300 via-pink-300 to-red-300 h-screen flex items-center justify-center">
+
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm text-center">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">🎂 Happy Birthday Buhle</h2>
+    <p class="mb-6 text-sm text-gray-600">Enter the secret code to unlock your surprise 👀</p>
+
+    <form id="loginForm" class="space-y-4">
+      <input type="text" id="username" placeholder="Username" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400" />
+      <input type="password" id="password" placeholder="Password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400" />
+        <button type="button" onclick="location.href='home.html'" class="w-full bg-pink-500 text-white py-2 rounded-lg hover:bg-pink-600 transition duration-200">
+        Unlock Surprise
+        </button>
+    <p id="errorMsg" class="text-red-500 text-sm mt-3 hidden">Wrong username or password 😢</p>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // Set your one-time credentials here:
+    const validUsername = "Sista B";
+    const validPassword = "18emoyeni";
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (username === validUsername && password === validPassword) {
+        // Optional: Save login state in sessionStorage
+        sessionStorage.setItem("bday_logged_in", "true");
+        window.location.href = "birthday.html"; // Redirect to birthday page
+      } else {
+        errorMsg.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy Birthday 🎉</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+
+    .confetti {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      z-index: 50;
+    }
+
+    canvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .wheel-container {
+      position: relative;
+      margin: 50px auto;
+      width: 300px;
+      height: 300px;
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 10px solid #ff69b4;
+      background: conic-gradient(
+        #fbbf24 0deg 60deg,
+        #f472b6 60deg 120deg,
+        #60a5fa 120deg 180deg,
+        #a78bfa 180deg 240deg,
+        #34d399 240deg 300deg,
+        #f87171 300deg 360deg
+      );
+      position: relative;
+      transition: transform 4s ease-out;
+      box-shadow: 0 0 20px 10px #f472b6;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 30px solid #111827;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 15px #ec4899; }
+      50% { box-shadow: 0 0 35px #f472b6; }
+      100% { box-shadow: 0 0 15px #ec4899; }
+    }
+
+    #spinBtn {
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-200 min-h-screen flex flex-col items-center justify-start pt-12 text-center relative">
+
+  <!-- Background Music -->
+  <audio autoplay loop>
+    <source src="Happy Birthday-yt.savetube.me.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Confetti -->
+  <div class="confetti"><canvas id="confettiCanvas"></canvas></div>
+
+  <!-- Message -->
+  <h1 class="text-4xl font-extrabold text-pink-600 mb-4 animate-pulse">Happy Birthday, Queen B! 👑</h1>
+  <p class="text-lg text-gray-800 max-w-xl mb-8 px-6">
+    It’s your time to shine 🌟 — spin the wheel of laughter, love and surprises! 💖
+  </p>
+
+  <!-- Wheel -->
+  <div class="wheel-container">
+    <div class="pointer"></div>
+    <div id="wheel" class="wheel"></div>
+  </div>
+
+  <!-- Spin Button -->
+  <button id="spinBtn" class="mt-6 bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-xl font-semibold shadow-lg transition">
+    🎡 Spin the Wheel
+  </button>
+
+  <!-- Result -->
+  <p id="result" class="mt-6 text-xl font-bold text-purple-800"></p>
+
+  <!-- Side Panel for Prizes -->
+  <div class="fixed top-0 right-0 h-full w-64 bg-white border-l border-pink-300 shadow-xl p-4 z-40">
+    <h2 class="text-xl font-bold text-pink-600 mb-4">🎁 Prizes Won</h2>
+    <ul id="prizeList" class="space-y-3 overflow-y-auto max-h-[80vh]">
+      <!-- Prizes will be added here dynamically -->
+    </ul>
+  </div>
+
+  <script>
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    const result = document.getElementById("result");
+    const prizeList = document.getElementById("prizeList");
+
+    const options = [
+      "You've won R100 💸",
+      "You've won R2 😅",
+      "Unlucky bozza yam 😬",
+      "Free McDonald's Meal 🍔🍟",
+      "Better luck next time 🙃",
+      "Getting splashed by the whole office 💦"
+    ];
+
+    let spins = 0;
+    let isSpinning = false;
+    let currentRotation = 0;
+    const claimedPrizes = new Set();
+
+    spinBtn.addEventListener("click", () => {
+      if (isSpinning || spins >= 3) return;
+      isSpinning = true;
+      spins++;
+
+      const randomAngle = Math.floor(Math.random() * 360);
+      const spinRotation = 360 * 5 + randomAngle;
+      currentRotation += spinRotation;
+      wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+      setTimeout(() => {
+        const normalizedAngle = (currentRotation % 360 + 360) % 360;
+        const segmentAngle = 360 / options.length;
+        const selectedIndex = Math.floor((360 - normalizedAngle + segmentAngle / 2) % 360 / segmentAngle);
+        const prize = options[selectedIndex];
+
+        result.textContent = `🎁 You got: ${prize}`;
+        addPrizeToPanel(prize);
+
+        if (spins < 3) {
+          alert(`${prize}\n\nYou have ${3 - spins} spin(s) left. Want to go again?`);
+        } else {
+          alert(`${prize}\n\n🎉 All spins used! Hope you loved your surprises!`);
+          spinBtn.textContent = "🎉 All Spins Used";
+          spinBtn.disabled = true;
+          spinBtn.classList.add("opacity-50", "cursor-not-allowed");
+        }
+
+        isSpinning = false;
+      }, 4000);
+    });
+
+    function addPrizeToPanel(prize) {
+      const li = document.createElement("li");
+      li.className = "flex justify-between items-center bg-pink-100 p-2 rounded-md shadow";
+
+      const text = document.createElement("span");
+      text.textContent = prize;
+
+      const claimBtn = document.createElement("button");
+      claimBtn.textContent = claimedPrizes.has(prize) ? "Already Claimed" : "Claim";
+      claimBtn.className = "text-white text-sm px-3 py-1 rounded";
+      
+      if (claimedPrizes.has(prize)) {
+        claimBtn.disabled = true;
+        claimBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+      } else {
+        claimBtn.classList.add("bg-pink-500", "hover:bg-pink-600");
+        claimBtn.onclick = () => {
+          alert(`✅ Claimed: ${prize}`);
+          claimBtn.disabled = true;
+          claimBtn.textContent = "Claimed";
+          claimBtn.classList.remove("hover:bg-pink-600");
+          claimBtn.classList.add("opacity-50", "cursor-not-allowed");
+          claimedPrizes.add(prize);
+        };
+      }
+
+      li.appendChild(text);
+      li.appendChild(claimBtn);
+      prizeList.appendChild(li);
+    }
+
+    // Confetti Animation
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const confetti = [];
+    for (let i = 0; i < 300; i++) {
+      confetti.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        r: Math.random() * 6 + 4,
+        d: Math.random() * 2 + 1,
+        color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+        tilt: Math.random() * 10 - 5
+      });
+    }
+
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confetti.forEach(c => {
+        ctx.beginPath();
+        ctx.fillStyle = c.color;
+        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      updateConfetti();
+      requestAnimationFrame(drawConfetti);
+    }
+
+    function updateConfetti() {
+      confetti.forEach(c => {
+        c.y += c.d;
+        c.x += Math.sin(c.tilt);
+        if (c.y > canvas.height) {
+          c.y = -10;
+          c.x = Math.random() * canvas.width;
+        }
+      });
+    }
+
+    drawConfetti();
+  </script>
+</body>
+</html>
